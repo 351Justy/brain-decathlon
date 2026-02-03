@@ -219,6 +219,7 @@ def draw_header_section(c, page_width, page_height, date_str):
     text = f"Brain Decathlon {date_str}   pi={blank}digits , Puzzle{blank}/ 9 , Time{blank}:{blank}"
     text_y = header_y - 4 * mm
     c.drawString(header_x + 2 * mm, text_y, text)
+c.setFont(FONT_REGULAR, 11)  # 11ptフォント
 
 
 def draw_note_section(c, page_width, page_height):
@@ -275,7 +276,7 @@ def draw_qr_sections(c, page_width, page_height, date_prefix):
     c.drawCentredString(answer_x + box_width / 2, answer_y - 4 * mm, "Answer")
     
     # GuideのQRコードを生成・描画
-    guide_url = "https://justy.co.jp/decathlon/guide.html"
+    guide_url = "https://351justy.github.io/brain-decathlon/guide.pdf"
     guide_qr = generate_qr_code(guide_url, box_size=10, border=1)
     
     guide_qr_buffer = io.BytesIO()
@@ -288,7 +289,7 @@ def draw_qr_sections(c, page_width, page_height, date_prefix):
     c.drawImage(guide_qr_image, qr_x_offset, qr_y_offset, width=qr_size, height=qr_size)
     
     # AnswerのQRコードを生成・描画
-    answer_url = f"https://justy.co.jp/decathlon/{date_prefix}_ans.pdf"
+    answer_url = f"https://351justy.github.io/brain-decathlon/{date_prefix}_ans.pdf"
     answer_qr = generate_qr_code(answer_url, box_size=10, border=1)
     
     answer_qr_buffer = io.BytesIO()
@@ -329,15 +330,15 @@ def draw_answer_pi_section(c, page_width, page_height):
     # 円周率の6行
     pi_lines = [
         "π=3.1415926535 8979323846 2643383279 5028841971 6939937510",
-        "  5820974944 5923078164 0628620899 8628034825 3421170679",
-        "  8214808651 3282306647 0938446095 5058223172 5359408128",
-        "  4811174502 8410270193 8521105559 6446229489 5493038196",
-        "  4428810975 6659334461 2847564823 3786783165 2712019091",
-        "  4564856692 3460348610 4543266482 1339360726 0249141273",
+        "     5820974944 5923078164 0628620899 8628034825 3421170679",
+        "     8214808651 3282306647 0938446095 5058223172 5359408128",
+        "     4811174502 8410270193 8521105559 6446229489 5493038196",
+        "     4428810975 6659334461 2847564823 3786783165 2712019091",
+        "     4564856692 3460348610 4543266482 1339360726 0249141273",
     ]
     
     c.setFillColor(HexColor('#000000'))
-    c.setFont(FONT_REGULAR, 9)  # 9ptフォント
+    c.setFont(FONT_REGULAR, 10)  # 10ptフォント
     
     line_spacing = 4 * mm  # 行間を詰める
     for i, line in enumerate(pi_lines):
@@ -369,7 +370,7 @@ def draw_answer_qr_sections(c, page_width, page_height):
     c.drawCentredString(games_x + box_width / 2, games_y - 4 * mm, "Games")
     
     # more πのQRコードを生成・描画
-    morepi_url = "https://justy.co.jp/pi/"
+    morepi_url = "https://www.tstcl.jp/randd/constants/pi/"
     morepi_qr = generate_qr_code(morepi_url, box_size=10, border=1)
     
     morepi_qr_buffer = io.BytesIO()
@@ -441,8 +442,8 @@ def get_layout():
         'calcpuzzle': (
             175.0 + 14*MM,
             (407.0 - 3*MM) - 4*MM,
-            187.0,
-            157.0
+            187.0*0.92,
+            157.0*0.92
         ),
         'sumpuzzle': (
             390.5 + 5*MM,
