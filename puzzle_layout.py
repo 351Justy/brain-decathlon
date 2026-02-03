@@ -212,14 +212,13 @@ def draw_header_section(c, page_width, page_height, date_str):
     header_y = page_height - 5 * mm
     
     c.setFillColor(HexColor('#000000'))
-    c.setFont(FONT_BOLD, 11)
+    c.setFont(FONT_BOLD, 10)
     
     # 4倍幅の余白を表現するためにスペースを多めに入れる
     blank = "        "  # 8スペース（4倍幅相当）
     text = f"Brain Decathlon {date_str}   pi={blank}digits , Puzzle{blank}/ 9 , Time{blank}:{blank}"
     text_y = header_y - 4 * mm
     c.drawString(header_x + 2 * mm, text_y, text)
-c.setFont(FONT_REGULAR, 11)  # 11ptフォント
 
 
 def draw_note_section(c, page_width, page_height):
