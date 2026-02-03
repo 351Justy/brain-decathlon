@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Decathlon - Daily Puzzle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .today-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .today-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .date-display {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .btn-puzzle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-answer {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .archive {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .archive h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .archive-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .archive-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .archive-list a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .archive-list a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+        footer a {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Brain Decathlon</h1>
+            <p class="subtitle">毎日の脳トレパズル</p>
+        </header>
+
+        <div class="today-card">
+            <h2>📅 今日のパズル</h2>
+            <div class="date-display" id="today-date"></div>
+            <div class="buttons">
+                <a href="#" class="btn btn-puzzle" id="puzzle-link">📝 問題 (PDF)</a>
+                <a href="#" class="btn btn-answer" id="answer-link">✅ 解答 (PDF)</a>
+            </div>
+        </div>
+
+        <div class="archive">
+            <h2>📚 過去のパズル</h2>
+            <ul class="archive-list" id="archive-list">
+                <!-- ARCHIVE_LIST_PLACEHOLDER -->
+            </ul>
+        </div>
+
+        <footer>
+            <p>© 2026 Brain Decathlon by <a href="https://justy.co.jp">Justy LLC</a></p>
+            <p><a href="guide.html">遊び方ガイド</a> | <a href="https://justy.co.jp/games/">その他のゲーム</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // 日本時間で今日の日付を取得
+        function getJSTDate() {
+            const now = new Date();
+            const jst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+            return jst.toISOString().slice(0, 10).replace(/-/g, '');
+        }
+
+        function formatDate(dateStr) {
+            const year = dateStr.slice(0, 4);
+            const month = dateStr.slice(4, 6);
+            const day = dateStr.slice(6, 8);
+            return `${year}/${month}/${day}`;
+        }
+
+        // 今日の日付を設定
+        const today = getJSTDate();
+        document.getElementById('today-date').textContent = formatDate(today);
+        document.getElementById('puzzle-link').href = `puzzles/${today}_puzzle.pdf`;
+        document.getElementById('answer-link').href = `puzzles/${today}_answer.pdf`;
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Decathlon - 遊び方ガイド</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Noto Sans JP', sans-serif;
+            background: #f5f5f5;
+            line-height: 1.8;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .back-link {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        .back-link:hover {
+            opacity: 1;
+        }
+        .puzzle-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .puzzle-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .puzzle-section h3 {
+            color: #333;
+            margin: 15px 0 10px;
+        }
+        .puzzle-section p {
+            margin-bottom: 10px;
+        }
+        .puzzle-section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .puzzle-section li {
+            margin-bottom: 5px;
+        }
+        .tip {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        footer a {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🧠 Brain Decathlon</h1>
+        <p>遊び方ガイド</p>
+        <a href="index.html" class="back-link">← トップページに戻る</a>
+    </header>
+
+    <div class="container">
+        <div class="puzzle-section">
+            <h2>📋 Brain Decathlon とは</h2>
+            <p>Brain Decathlon（ブレイン・デカスロン）は、9種類のパズルに挑戦する毎日の脳トレです。</p>
+            <p>円周率を暗記しながら、様々なパズルを解いて脳を鍛えましょう！</p>
+            
+            <h3>π（円周率）チャレンジ</h3>
+            <p>用紙上部の罫線エリアに、覚えている円周率の桁数を書き込みましょう。毎日少しずつ覚える桁数を増やしていきましょう！</p>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>1️⃣ ビルパズル</h2>
+            <p>左側の数字の組み合わせを使って、右側の数字を作る計算式を考えます。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>左側の数字をすべて1回ずつ使用</li>
+                <li>四則演算（＋−×÷）を使用可能</li>
+                <li>括弧を使用可能</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>2️⃣ 賢賢（KenKen）</h2>
+            <p>数独に似たパズルです。太線で囲まれた領域の数字を計算すると、左上の数字になります。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>各行・各列に1〜6の数字を1つずつ配置</li>
+                <li>太線で囲まれたケージ内の数字を指定された演算で計算すると、ケージの左上の数字になる</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>3️⃣ マッチ棒パズル</h2>
+            <p>マッチ棒を動かして、正しい等式を作ります。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>指定された本数のマッチ棒だけを動かす</li>
+                <li>マッチ棒を取り除いたり追加したりはしない</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>4️⃣ 覆面算</h2>
+            <p>図形に隠された数字を推理します。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>同じ図形には同じ数字が入る</li>
+                <li>異なる図形には異なる数字が入る</li>
+                <li>縦・横の計算が成り立つように数字を当てはめる</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>5️⃣ カウントダウン</h2>
+            <p>与えられた数字と演算子を使って、目標の数を作ります。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>各数字は1回だけ使用可能</li>
+                <li>四則演算を使用</li>
+                <li>すべての数字を使う必要はない</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>6️⃣ ミニナンプレ</h2>
+            <p>6×6の数独パズルです。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>各行に1〜6の数字を1つずつ配置</li>
+                <li>各列に1〜6の数字を1つずつ配置</li>
+                <li>各2×3ブロックに1〜6の数字を1つずつ配置</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>7️⃣ 計算パズル</h2>
+            <p>縦横の計算式がすべて成り立つように空欄を埋めます。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>横の計算式が成り立つように数字を入れる</li>
+                <li>縦の計算式も同時に成り立つ</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>8️⃣ 合計パズル</h2>
+            <p>行と列の合計が指定された数になるように数字を配置します。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>各行の数字の合計が左端の数字になる</li>
+                <li>各列の数字の合計が上端の数字になる</li>
+            </ul>
+        </div>
+
+        <div class="puzzle-section">
+            <h2>9️⃣ 迷路</h2>
+            <p>スタートからゴールまでの道を見つけます。</p>
+            <h3>ルール</h3>
+            <ul>
+                <li>壁を通らずに進む</li>
+                <li>最短経路を見つけなくてもOK</li>
+            </ul>
+            <div class="tip">
+                💡 ヒント：行き止まりを見つけて消していく方法が効果的です
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="index.html">← トップページに戻る</a></p>
+        <p>© 2026 <a href="https://justy.co.jp">Justy LLC</a></p>
+    </footer>
+</body>
+</html>
