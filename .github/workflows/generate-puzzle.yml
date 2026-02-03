@@ -16,6 +16,10 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     
+    # タイムゾーンを日本時間に設定（重要！）
+    env:
+      TZ: Asia/Tokyo
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,11 +53,14 @@ jobs:
           if [ -n "${{ github.event.inputs.date }}" ]; then
             echo "DATE=${{ github.event.inputs.date }}" >> $GITHUB_OUTPUT
           else
-            # 日本時間で今日の日付を取得
-            echo "DATE=$(TZ=Asia/Tokyo date +%Y%m%d)" >> $GITHUB_OUTPUT
+            # TZ=Asia/Tokyo が設定されているので、日本時間で取得される
+            echo "DATE=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
           fi
+          echo "Using date: $(cat $GITHUB_OUTPUT | grep DATE)"
       
       - name: Generate puzzles
+        env:
+          PUZZLE_DATE: ${{ steps.date.outputs.DATE }}
         run: |
           cd generators
           python ../puzzle_layout.py ${{ steps.date.outputs.DATE }}
