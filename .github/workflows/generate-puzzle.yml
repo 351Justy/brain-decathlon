@@ -1,0 +1,70 @@
+name: Generate Daily Puzzle
+
+on:
+  # 毎日日本時間の午前0時（UTC 15:00）に実行
+  schedule:
+    - cron: '0 15 * * *'
+  # 手動実行も可能
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Date to generate (YYYYMMDD format, empty for today)'
+        required: false
+        default: ''
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-dejavu-core
+      
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Set date
+        id: date
+        run: |
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            echo "DATE=${{ github.event.inputs.date }}" >> $GITHUB_OUTPUT
+          else
+            # 日本時間で今日の日付を取得
+            echo "DATE=$(TZ=Asia/Tokyo date +%Y%m%d)" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Generate puzzles
+        run: |
+          cd generators
+          python ../puzzle_layout.py ${{ steps.date.outputs.DATE }}
+      
+      - name: Move PDFs to docs
+        run: |
+          mkdir -p docs/puzzles
+          mv generators/${{ steps.date.outputs.DATE }}_puzzle.pdf docs/puzzles/
+          mv generators/${{ steps.date.outputs.DATE }}_answer.pdf docs/puzzles/
+      
+      - name: Update index page
+        run: |
+          python scripts/update_index.py
+      
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/
+          git diff --staged --quiet || git commit -m "Add puzzle for ${{ steps.date.outputs.DATE }}"
+          git push
