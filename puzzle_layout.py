@@ -288,7 +288,7 @@ def draw_qr_sections(c, page_width, page_height, date_prefix):
     c.drawImage(guide_qr_image, qr_x_offset, qr_y_offset, width=qr_size, height=qr_size)
     
     # AnswerのQRコードを生成・描画
-    answer_url = f"https://351justy.github.io/brain-decathlon/{date_prefix}_ans.pdf"
+    answer_url = f"https://351justy.github.io/brain-decathlon/puzzles/{date_prefix}_ans.pdf"
     answer_qr = generate_qr_code(answer_url, box_size=10, border=1)
     
     answer_qr_buffer = io.BytesIO()
