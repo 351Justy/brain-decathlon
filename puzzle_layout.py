@@ -4,11 +4,7 @@
 SVGファイル名は実行日付に基づいて YYYYMMDD_xxx.svg の形式
 
 使用方法:
-    generatorsフォルダから実行:
-    $ cd generators
-    $ python ../puzzle_layout.py [YYYYMMDD]
-
-    または親ディレクトリから:
+    パズル生成スクリプト群があるフォルダで実行してください。
     $ python puzzle_layout.py [YYYYMMDD]
 
 出力:
@@ -102,26 +98,10 @@ from svglib.svglib import svg2rlg
 # ============================================
 # SVG生成スクリプトの実行
 # ============================================
-def find_generators_dir():
-    """generatorsディレクトリを探す"""
-    cwd = Path.cwd()
-    
-    # 現在のディレクトリがgeneratorsの場合
-    if cwd.name == 'generators':
-        return cwd
-    
-    # 現在のディレクトリにgeneratorsがある場合
-    generators_dir = cwd / 'generators'
-    if generators_dir.exists():
-        return generators_dir
-    
-    # 見つからない場合は現在のディレクトリを返す
-    return cwd
-
-
-def generate_svg_files(working_dir):
+def generate_svg_files(working_dir, date_prefix=None):
     """
     各パズル生成スクリプトを実行してSVGファイルを生成
+    日付を引数と環境変数の両方で渡す
     """
     scripts = [
         "building_puzzle_svg.py",
@@ -137,14 +117,25 @@ def generate_svg_files(working_dir):
     
     base_dir = Path(working_dir)
     
+    # 環境変数で日付を渡す（サブプログラムが対応している場合）
+    env = os.environ.copy()
+    if date_prefix:
+        env['PUZZLE_DATE'] = date_prefix
+    
     for script in scripts:
         script_path = base_dir / script
         if script_path.exists():
             print(f"=== Running {script} ===")
             try:
+                # 日付を引数として渡す
+                cmd = [sys.executable, str(script_path)]
+                if date_prefix:
+                    cmd.append(date_prefix)
+                
                 result = subprocess.run(
-                    [sys.executable, str(script_path)],
+                    cmd,
                     cwd=str(base_dir),
+                    env=env,
                     check=True
                 )
             except subprocess.CalledProcessError as e:
@@ -214,6 +205,8 @@ def generate_qr_code(url, box_size=10, border=1):
 def draw_header_section(c, page_width, page_height, date_str):
     """
     ヘッダーテキストを描画（背景色なし）
+    「Brain Decathlon YYYY/MM/DD   pi=    digits , Puzzle   / 9 , Time    :     」
+    入力欄は4倍幅の余白
     """
     header_x = 8 * mm
     header_y = page_height - 5 * mm
@@ -221,7 +214,8 @@ def draw_header_section(c, page_width, page_height, date_str):
     c.setFillColor(HexColor('#000000'))
     c.setFont(FONT_BOLD, 11)
     
-    blank = "        "
+    # 4倍幅の余白を表現するためにスペースを多めに入れる
+    blank = "        "  # 8スペース（4倍幅相当）
     text = f"Brain Decathlon {date_str}   pi={blank}digits , Puzzle{blank}/ 9 , Time{blank}:{blank}"
     text_y = header_y - 4 * mm
     c.drawString(header_x + 2 * mm, text_y, text)
@@ -230,12 +224,15 @@ def draw_header_section(c, page_width, page_height, date_str):
 def draw_note_section(c, page_width, page_height):
     """
     4行の横罫線ノートを描画（背景色なし）
+    1行目の最初に「π=」と書く
+    罫線はパズル画像と被らない範囲まで
     """
     note_x = 5 * mm
     note_y = page_height - 10 * mm
     note_width = 132 * mm
     note_height = 32 * mm
     
+    # 4行の横罫線（グレーの破線）を描画
     c.setStrokeColor(HexColor('#808080'))
     c.setLineWidth(0.5)
     c.setDash(3, 2)
@@ -247,6 +244,7 @@ def draw_note_section(c, page_width, page_height):
     
     c.setDash()
     
+    # 1行目の最初に「π=」を書く
     c.setFillColor(HexColor('#000000'))
     c.setFont(FONT_REGULAR, 12)
     pi_y = note_y - line_spacing + 2 * mm
@@ -255,7 +253,7 @@ def draw_note_section(c, page_width, page_height):
 
 def draw_qr_sections(c, page_width, page_height, date_prefix):
     """
-    Guide/AnswerのQRコードを描画
+    Guide/AnswerのQRコードを描画（背景色なし）
     """
     from reportlab.lib.utils import ImageReader
     
@@ -268,14 +266,18 @@ def draw_qr_sections(c, page_width, page_height, date_prefix):
     answer_x = page_width - 32 * mm
     answer_y = page_height - 5 * mm
     
+    # 「Guide」テキストを描画
     c.setFillColor(HexColor('#000000'))
     c.setFont(FONT_BOLD, 9)
     c.drawCentredString(guide_x + box_width / 2, guide_y - 4 * mm, "Guide")
+    
+    # 「Answer」テキストを描画
     c.drawCentredString(answer_x + box_width / 2, answer_y - 4 * mm, "Answer")
     
-    # Guide QR
+    # GuideのQRコードを生成・描画
     guide_url = "https://justy.co.jp/decathlon/guide.html"
     guide_qr = generate_qr_code(guide_url, box_size=10, border=1)
+    
     guide_qr_buffer = io.BytesIO()
     guide_qr.save(guide_qr_buffer, format='PNG')
     guide_qr_buffer.seek(0)
@@ -285,9 +287,10 @@ def draw_qr_sections(c, page_width, page_height, date_prefix):
     qr_x_offset = guide_x + (box_width - qr_size) / 2
     c.drawImage(guide_qr_image, qr_x_offset, qr_y_offset, width=qr_size, height=qr_size)
     
-    # Answer QR
+    # AnswerのQRコードを生成・描画
     answer_url = f"https://justy.co.jp/decathlon/{date_prefix}_ans.pdf"
     answer_qr = generate_qr_code(answer_url, box_size=10, border=1)
+    
     answer_qr_buffer = io.BytesIO()
     answer_qr.save(answer_qr_buffer, format='PNG')
     answer_qr_buffer.seek(0)
@@ -301,7 +304,9 @@ def draw_qr_sections(c, page_width, page_height, date_prefix):
 # Answer PDF用の描画関数
 # ============================================
 def draw_answer_header_section(c, page_width, page_height, date_str):
-    """Answer PDF用ヘッダー"""
+    """
+    Answer PDF用ヘッダー：「Brain Decathlon YYYY/MM/DD Answer」
+    """
     header_x = 8 * mm
     header_y = page_height - 5 * mm
     
@@ -314,10 +319,14 @@ def draw_answer_header_section(c, page_width, page_height, date_str):
 
 
 def draw_answer_pi_section(c, page_width, page_height):
-    """Answer PDF用：円周率表示"""
+    """
+    Answer PDF用：円周率の数字を表示（罫線なし）
+    9ptフォント、行間を詰める
+    """
     note_x = 5 * mm
     note_y = page_height - 10 * mm
     
+    # 円周率の6行
     pi_lines = [
         "π=3.1415926535 8979323846 2643383279 5028841971 6939937510",
         "  5820974944 5923078164 0628620899 8628034825 3421170679",
@@ -328,16 +337,18 @@ def draw_answer_pi_section(c, page_width, page_height):
     ]
     
     c.setFillColor(HexColor('#000000'))
-    c.setFont(FONT_REGULAR, 9)
+    c.setFont(FONT_REGULAR, 9)  # 9ptフォント
     
-    line_spacing = 4 * mm
+    line_spacing = 4 * mm  # 行間を詰める
     for i, line in enumerate(pi_lines):
         line_y = note_y - (i + 1) * line_spacing
         c.drawString(note_x + 3 * mm, line_y, line)
 
 
 def draw_answer_qr_sections(c, page_width, page_height):
-    """Answer PDF用：more π と Games のQRコード"""
+    """
+    Answer PDF用：「more π」と「Games」のQRコード
+    """
     from reportlab.lib.utils import ImageReader
     
     box_width = 26 * mm
@@ -349,14 +360,18 @@ def draw_answer_qr_sections(c, page_width, page_height):
     games_x = page_width - 32 * mm
     games_y = page_height - 5 * mm
     
+    # 「more π」テキストを描画
     c.setFillColor(HexColor('#000000'))
     c.setFont(FONT_BOLD, 9)
     c.drawCentredString(morepi_x + box_width / 2, morepi_y - 4 * mm, "more π")
+    
+    # 「Games」テキストを描画
     c.drawCentredString(games_x + box_width / 2, games_y - 4 * mm, "Games")
     
-    # more π QR
+    # more πのQRコードを生成・描画
     morepi_url = "https://justy.co.jp/pi/"
     morepi_qr = generate_qr_code(morepi_url, box_size=10, border=1)
+    
     morepi_qr_buffer = io.BytesIO()
     morepi_qr.save(morepi_qr_buffer, format='PNG')
     morepi_qr_buffer.seek(0)
@@ -366,9 +381,10 @@ def draw_answer_qr_sections(c, page_width, page_height):
     qr_x_offset = morepi_x + (box_width - qr_size) / 2
     c.drawImage(morepi_qr_image, qr_x_offset, qr_y_offset, width=qr_size, height=qr_size)
     
-    # Games QR
+    # GamesのQRコードを生成・描画
     games_url = "https://justy.co.jp/games/"
     games_qr = generate_qr_code(games_url, box_size=10, border=1)
+    
     games_qr_buffer = io.BytesIO()
     games_qr.save(games_qr_buffer, format='PNG')
     games_qr_buffer.seek(0)
@@ -386,27 +402,83 @@ def get_layout():
     MM = 72.0 / 25.4
 
     base_layout = {
-        'building': (31.5 + 140*MM, (574.5 - 3*MM) - 5*MM, 124.0 * 1.16, 122.0 * 1.16),
-        'kenken': (185.5 + 40*MM, 609.0 - 12*MM, 124.5 * 0.78, 126.5 * 0.78),
-        'matchstick': (387.5 + 8*MM, 719.5, 142.5 * 1.2, 40.5 * 1.2),
-        'cryptarithm': (325.0 - 60*MM, 562.0 - 12*MM, 125.0 * 1.15, 165.0 * 1.15),
-        'countdown': (450.0 - 150*MM, (562.5 + 15*MM) - 13*MM, 108.5 * 1.5, 151.0 * 1.5),
-        'mininumpre': (35.0 - 5*MM, 405.5 - 1*MM, 159.5 * 0.87, 159.5 * 0.87),
-        'calcpuzzle': (175.0 + 14*MM, (407.0 - 3*MM) - 4*MM, 187.0, 157.0),
-        'sumpuzzle': (390.5 + 5*MM, 399.0, 169.5, 166.0),
-        'maze': ((36.5 + 522.5/2) - (522.5*1.07)/2, (((37.5 + 364.5/2) - (364.5*1.07)/2) - 3*MM) - 2*MM, 522.5 * 1.07, 364.5 * 1.07),
+        'building': (
+            31.5 + 140*MM,
+            (574.5 - 3*MM) - 5*MM,
+            124.0 * 1.16,
+            122.0 * 1.16
+        ),
+        'kenken': (
+            185.5 + 40*MM,
+            609.0 - 12*MM,
+            124.5 * 0.78,
+            126.5 * 0.78
+        ),
+        'matchstick': (
+            387.5 + 8*MM,
+            719.5,
+            142.5 * 1.2,
+            40.5  * 1.2
+        ),
+        'cryptarithm': (
+            325.0 - 60*MM,
+            562.0 - 12*MM,
+            125.0 * 1.15,
+            165.0 * 1.15
+        ),
+        'countdown': (
+            450.0 - 150*MM,
+            (562.5 + 15*MM) - 13*MM,
+            108.5 * 1.5,
+            151.0 * 1.5
+        ),
+        'mininumpre': (
+            35.0 - 5*MM,
+            405.5 - 1*MM,
+            159.5 * 0.87,
+            159.5 * 0.87
+        ),
+        'calcpuzzle': (
+            175.0 + 14*MM,
+            (407.0 - 3*MM) - 4*MM,
+            187.0,
+            157.0
+        ),
+        'sumpuzzle': (
+            390.5 + 5*MM,
+            399.0,
+            169.5,
+            166.0
+        ),
+        'maze': (
+            (36.5 + 522.5/2) - (522.5*1.07)/2,
+            (((37.5 + 364.5/2) - (364.5*1.07)/2) - 3*MM) - 2*MM,
+            522.5 * 1.07,
+            364.5 * 1.07
+        ),
     }
 
     dx_dy_mm = {
-        'building': (+4, +5), 'kenken': (+4, +5), 'matchstick': (0, -3),
-        'cryptarithm': (0, -1), 'countdown': (-5, -3), 'mininumpre': (0, 0),
-        'calcpuzzle': (0, 0), 'sumpuzzle': (0, 0), 'maze': (0, 0),
+        'building': ( +4, +5),
+        'kenken':   ( +4, +5),
+        'matchstick': (0, -3),
+        'cryptarithm': (0, -1),
+        'countdown': (-5, -3),
+        'mininumpre': (0, 0),
+        'calcpuzzle': (0, 0),
+        'sumpuzzle': (0, 0),
+        'maze': (0, 0),
     }
 
     layout = {}
     for name, (x, y, w, h) in base_layout.items():
         dx_mm, dy_mm = dx_dy_mm.get(name, (0, 0))
-        layout[name] = (x + dx_mm * MM, y + dy_mm * MM, w, h)
+        layout[name] = (
+            x + dx_mm * MM,
+            y + dy_mm * MM,
+            w,
+            h
+        )
     
     return layout
 
@@ -422,20 +494,31 @@ def create_puzzle_pdf(working_dir=None, date_override=None):
     date_prefix = date_override if date_override else get_date_prefix()
     
     if date_override:
-        formatted_date = f"{date_override[:4]}/{date_override[4:6]}/{date_override[6:8]}"
+        year = date_override[:4]
+        month = date_override[4:6]
+        day = date_override[6:8]
+        formatted_date = f"{year}/{month}/{day}"
     else:
         formatted_date = get_formatted_date()
 
     output_path = os.path.join(working_dir, f"{date_prefix}_puzzle.pdf")
 
-    svg_files = {name: f'{date_prefix}_{name}.svg' for name in [
-        'building', 'kenken', 'matchstick', 'cryptarithm',
-        'countdown', 'mininumpre', 'calcpuzzle', 'sumpuzzle', 'maze'
-    ]}
+    svg_files = {
+        'building': f'{date_prefix}_building.svg',
+        'kenken': f'{date_prefix}_kenken.svg',
+        'matchstick': f'{date_prefix}_matchstick.svg',
+        'cryptarithm': f'{date_prefix}_cryptarithm.svg',
+        'countdown': f'{date_prefix}_countdown.svg',
+        'mininumpre': f'{date_prefix}_mininumpre.svg',
+        'calcpuzzle': f'{date_prefix}_calcpuzzle.svg',
+        'sumpuzzle': f'{date_prefix}_sumpuzzle.svg',
+        'maze': f'{date_prefix}_maze.svg',
+    }
 
     page_width, page_height = A4
     c = canvas.Canvas(output_path, pagesize=A4)
 
+    # ヘッダー、ノート、QRコードセクションを描画
     draw_header_section(c, page_width, page_height, formatted_date)
     draw_note_section(c, page_width, page_height)
     draw_qr_sections(c, page_width, page_height, date_prefix)
@@ -444,8 +527,9 @@ def create_puzzle_pdf(working_dir=None, date_override=None):
         path = os.path.join(working_dir, svg_files[name])
         if os.path.exists(path):
             return svg2rlg(path)
-        print(f"Warning: {path} not found")
-        return None
+        else:
+            print(f"Warning: {path} not found")
+            return None
 
     def draw_svg(drawing, x, y, target_width=None, target_height=None):
         if drawing is None:
@@ -463,9 +547,11 @@ def create_puzzle_pdf(working_dir=None, date_override=None):
         renderPDF.draw(drawing, c, x, y)
 
     layout = get_layout()
+
     for name in layout:
         x, y, w, h = layout[name]
-        draw_svg(load_svg(name), x, y, target_width=w, target_height=h)
+        d = load_svg(name)
+        draw_svg(d, x, y, target_width=w, target_height=h)
 
     c.save()
     print(f"PDF created: {output_path}")
@@ -473,27 +559,38 @@ def create_puzzle_pdf(working_dir=None, date_override=None):
 
 
 def create_answer_pdf(working_dir=None, date_override=None):
-    """解答用PDFを生成"""
+    """解答用PDFを生成（_ans付きSVGを使用）"""
     if working_dir is None:
         working_dir = os.getcwd()
 
     date_prefix = date_override if date_override else get_date_prefix()
     
     if date_override:
-        formatted_date = f"{date_override[:4]}/{date_override[4:6]}/{date_override[6:8]}"
+        year = date_override[:4]
+        month = date_override[4:6]
+        day = date_override[6:8]
+        formatted_date = f"{year}/{month}/{day}"
     else:
         formatted_date = get_formatted_date()
 
     output_path = os.path.join(working_dir, f"{date_prefix}_answer.pdf")
 
-    svg_files = {name: f'{date_prefix}_{name}_ans.svg' for name in [
-        'building', 'kenken', 'matchstick', 'cryptarithm',
-        'countdown', 'mininumpre', 'calcpuzzle', 'sumpuzzle', 'maze'
-    ]}
+    svg_files = {
+        'building': f'{date_prefix}_building_ans.svg',
+        'kenken': f'{date_prefix}_kenken_ans.svg',
+        'matchstick': f'{date_prefix}_matchstick_ans.svg',
+        'cryptarithm': f'{date_prefix}_cryptarithm_ans.svg',
+        'countdown': f'{date_prefix}_countdown_ans.svg',
+        'mininumpre': f'{date_prefix}_mininumpre_ans.svg',
+        'calcpuzzle': f'{date_prefix}_calcpuzzle_ans.svg',
+        'sumpuzzle': f'{date_prefix}_sumpuzzle_ans.svg',
+        'maze': f'{date_prefix}_maze_ans.svg',
+    }
 
     page_width, page_height = A4
     c = canvas.Canvas(output_path, pagesize=A4)
 
+    # Answer PDF用のヘッダー、円周率、QRコードセクションを描画
     draw_answer_header_section(c, page_width, page_height, formatted_date)
     draw_answer_pi_section(c, page_width, page_height)
     draw_answer_qr_sections(c, page_width, page_height)
@@ -502,8 +599,9 @@ def create_answer_pdf(working_dir=None, date_override=None):
         path = os.path.join(working_dir, svg_files[name])
         if os.path.exists(path):
             return svg2rlg(path)
-        print(f"Warning: {path} not found")
-        return None
+        else:
+            print(f"Warning: {path} not found")
+            return None
 
     def draw_svg(drawing, x, y, target_width=None, target_height=None):
         if drawing is None:
@@ -521,9 +619,11 @@ def create_answer_pdf(working_dir=None, date_override=None):
         renderPDF.draw(drawing, c, x, y)
 
     layout = get_layout()
+
     for name in layout:
         x, y, w, h = layout[name]
-        draw_svg(load_svg(name), x, y, target_width=w, target_height=h)
+        d = load_svg(name)
+        draw_svg(d, x, y, target_width=w, target_height=h)
 
     c.save()
     print(f"PDF created: {output_path}")
@@ -536,26 +636,23 @@ def create_answer_pdf(working_dir=None, date_override=None):
 def main():
     """
     メイン処理：
-    1. SVGファイルを生成
+    1. SVGファイルを生成（各パズル生成スクリプトを実行）
     2. Puzzle PDFを生成
     3. Answer PDFを生成
     4. SVGファイルを削除
     """
     date_override = sys.argv[1] if len(sys.argv) > 1 else None
     date_prefix = date_override if date_override else get_date_prefix()
-    
-    # generatorsディレクトリを探す
-    working_dir = str(find_generators_dir())
+    working_dir = os.getcwd()
     
     print("=" * 50)
     print(f"Brain Decathlon PDF Generator")
     print(f"Date: {date_prefix}")
-    print(f"Working directory: {working_dir}")
     print("=" * 50)
     
     # Step 1: SVGファイルを生成
     print("\n[Step 1] Generating SVG files...")
-    generate_svg_files(working_dir)
+    generate_svg_files(working_dir, date_prefix)
     
     # Step 2: Puzzle PDFを生成
     print("\n[Step 2] Creating Puzzle PDF...")
