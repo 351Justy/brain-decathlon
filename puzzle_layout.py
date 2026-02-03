@@ -212,7 +212,7 @@ def draw_header_section(c, page_width, page_height, date_str):
     header_y = page_height - 5 * mm
     
     c.setFillColor(HexColor('#000000'))
-    c.setFont(FONT_BOLD, 10)
+    c.setFont(FONT_BOLD, 9)
     
     # 4倍幅の余白を表現するためにスペースを多めに入れる
     blank = "        "  # 8スペース（4倍幅相当）
@@ -441,8 +441,8 @@ def get_layout():
         'calcpuzzle': (
             175.0 + 14*MM,
             (407.0 - 3*MM) - 4*MM,
-            187.0*0.92,
-            157.0*0.92
+            187.0*0.85,
+            157.0*0.85
         ),
         'sumpuzzle': (
             390.5 + 5*MM,
