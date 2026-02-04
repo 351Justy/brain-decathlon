@@ -225,7 +225,7 @@ class Maze:
             path_d = f'M{offset + (self.solution[0].x + 0.5) * cell_size},{offset + (self.solution[0].y + 0.5) * cell_size}'
             for i in range(1, len(self.solution)):
                 path_d += f' L{offset + (self.solution[i].x + 0.5) * cell_size},{offset + (self.solution[i].y + 0.5) * cell_size}'
-            lines.append(f'<path d="{path_d}" stroke="red" stroke-width="{solution_stroke_width}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
+            lines.append(f'<path d="{path_d}" stroke="black" stroke-width="{solution_stroke_width}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
         
         for y in range(self.height):
             for x in range(self.width):
